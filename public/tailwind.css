@@ -1,66 +1,18 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Chat window */
-#chat-container {
-  padding: 10px;
-  overflow-y: auto;
-  flex-grow: 1;
-}
-
-/* Message bubbles */
 .message {
-  max-width: 70%;
-  margin: 5px 0;
-  padding: 10px;
-  border-radius: 10px;
-  position: relative;
+  animation: fadeIn 0.3s ease-in-out;
 }
 
-/* User messages */
-.message.user {
-  background-color: #007bff;
-  color: white;
-  align-self: flex-end;
-  border-bottom-right-radius: 0;
-}
-
-/* Assistant messages */
-.message.assistant {
-  background-color: #f1f1f1;
-  color: black;
-  align-self: flex-start;
-  border-bottom-left-radius: 0;
-}
-
-/* Timestamps */
-.timestamp {
-  font-size: 0.75em;
-  position: absolute;
-  bottom: -1.5em;
-  right: 10px;
-  color: gray;
-}
-
-/* Input box */
-#user-input {
-  border: 1px solid #ccc;
-  border-radius: 20px 0 0 20px;
-  padding: 10px;
-}
-
-/* Send button */
-#send-button {
-  border: 1px solid #007bff;
-  background-color: #007bff;
-  color: white;
-  border-radius: 0 20px 20px 0;
-  cursor: pointer;
-}
-
-/* Loading indicator */
-#loading-indicator {
-  display: none;
-  text-align: center;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

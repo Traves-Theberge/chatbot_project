@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM fully loaded and parsed');
-  
+
   const loginForm = document.getElementById('login-form');
   const signupForm = document.getElementById('signup-form');
   const userInfo = document.getElementById('user-info');
@@ -10,12 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginButton = document.getElementById('login-button');
   const signupButton = document.getElementById('signup-button');
   const logoutButton = document.getElementById('logout-button');
-  const messageBox = document.createElement('div');  // Add a message box element
-
-  // Append message box to auth forms
-  authForms.appendChild(messageBox);
-  messageBox.style.display = 'none';
-  messageBox.style.color = 'red';
 
   if (showLogin) {
     console.log('Adding event listener to showLogin');
@@ -24,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Toggling login and signup forms');
         loginForm.classList.remove('hidden');
         signupForm.classList.add('hidden');
-        messageBox.style.display = 'none';  // Hide message box
       }
     });
   }
@@ -36,7 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Toggling signup and login forms');
         signupForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
-        messageBox.style.display = 'none';  // Hide message box
       }
     });
   }
@@ -67,8 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (response.error) {
       alert(response.error);
     } else {
-      messageBox.textContent = response.message;
-      messageBox.style.display = 'block';  // Show message box
+      alert(response.message);  // Show message using alert
     }
   };
 
