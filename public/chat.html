@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chatbot</title>
+  <link href="./build/styles.css" rel="stylesheet">
+</head>
+<body class="flex h-screen bg-gray-900 text-white">
+  <div class="w-1/4 h-full bg-gray-800 flex flex-col">
+    <div class="p-4 flex justify-between items-center">
+      <h2 class="text-xl">Chats</h2>
+      <div>
+        <button id="new-chat-button" class="bg-green-500 text-white p-2 rounded mr-2">New Chat</button>
+        <button id="logout-button" class="bg-red-500 text-white p-2 rounded">Logout</button>
+      </div>
+    </div>
+    <ul id="chat-sessions" class="flex-grow overflow-y-auto" data-active-session-id="null"></ul>
+    <div id="modal" class="p-4 hidden">
+      <h2 class="text-xl mb-4">New Chat Session</h2>
+      <input type="text" id="new-chat-name" class="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white" placeholder="Enter chat session name">
+      <div class="flex justify-center">
+        <button id="cancel-button" class="bg-gray-600 text-white p-2 rounded mr-2">Cancel</button>
+        <button id="create-button" class="bg-green-500 text-white p-2 rounded">Create</button>
+      </div>
+    </div>
+  </div>
+  <div class="w-3/4 h-full flex flex-col">
+    <div id="chat-container" class="flex-grow overflow-y-auto p-4">
+      <div id="chat-window" class="flex flex-col space-y-4"></div>
+    </div>
+    <div class="w-full p-4 bg-gray-800 flex">
+      <input type="text" id="user-input" class="flex-grow p-2 border border-gray-600 rounded-l-lg bg-gray-700 text-white" placeholder="Type your message...">
+      <button id="send-button" class="p-2 bg-blue-500 text-white rounded-r-lg">Send</button>
+    </div>
+  </div>
+  <script src="chat.js"></script>
+</body>
+</html>

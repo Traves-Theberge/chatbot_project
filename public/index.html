@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home - Chatbot</title>
+  <link href="./build/styles.css" rel="stylesheet">
+</head>
+<body class="flex items-center justify-center h-screen bg-gray-900 text-white">
+  <div class="w-full max-w-md p-8 bg-gray-800 rounded-lg">
+    <h1 class="text-2xl mb-6 text-center">Welcome to Chatbot</h1>
+    <div id="auth-forms">
+      <div id="login-form" class="mb-8">
+        <h2 class="text-xl mb-4 text-center">Login</h2>
+        <input type="email" id="login-email" class="w-full p-2 mb-2 bg-gray-700 text-white rounded" placeholder="Email">
+        <input type="password" id="login-password" class="w-full p-2 mb-4 bg-gray-700 text-white rounded" placeholder="Password">
+        <button id="login-button" class="w-full p-2 bg-pink-500 text-white rounded">Login</button>
+        <div class="mt-4 text-center">
+          <a href="#" class="text-gray-400">Forgot Password?</a>
+        </div>
+        <div class="mt-4 text-center">
+          <span class="text-gray-400">Need an account? </span>
+          <a href="#" id="show-signup" class="text-pink-500">Sign Up</a>
+        </div>
+      </div>
+      <div id="signup-form" class="hidden">
+        <h2 class="text-xl mb-4 text-center">Sign Up</h2>
+        <input type="email" id="signup-email" class="w-full p-2 mb-2 bg-gray-700 text-white rounded" placeholder="Email">
+        <input type="password" id="signup-password" class="w-full p-2 mb-4 bg-gray-700 text-white rounded" placeholder="Password">
+        <button id="signup-button" class="w-full p-2 bg-pink-500 text-white rounded">Sign Up</button>
+        <div class="mt-4 text-center">
+          <span class="text-gray-400">Already have an account? </span>
+          <a href="#" id="show-login" class="text-pink-500">Login</a>
+        </div>
+      </div>
+    </div>
+    <div id="user-info" class="hidden text-center">
+      <p id="user-email" class="mb-4"></p>
+      <button id="logout-button" class="w-full p-2 bg-red-500 text-white rounded">Logout</button>
+      <a href="chat.html" class="block mt-4 underline">Go to Chatbot</a>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
