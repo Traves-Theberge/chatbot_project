@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const createButton = document.getElementById('create-button');
   const cancelButton = document.getElementById('cancel-button');
   const logoutButton = document.getElementById('logout-button');
+  const loadingIndicator = document.getElementById('loading-indicator');
 
   const loadChatSessions = async () => {
     console.log('Loading chat sessions');
@@ -29,7 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
           loadChat(mostRecentSession.id);
         } else {
           // Automatically create a new session if no sessions are present
-          await createChatSession('New Chat');
+          const newSession = await createChatSession('New Chat');
+          chatSessionsList.dataset.activeSessionId = newSession.id;
+          loadChat(newSession.id);
         }
       } else {
         console.error('Unexpected response format:', sessions);
@@ -69,9 +72,15 @@ document.addEventListener('DOMContentLoaded', function() {
       chatWindow.innerHTML = '';
       conversations.forEach(conversation => {
         const div = document.createElement('div');
-        div.textContent = `${conversation.sender}: ${conversation.content}`;
+        div.classList.add('message', conversation.sender);
+        div.textContent = `${conversation.content}`;
+        const timestamp = document.createElement('div');
+        timestamp.classList.add('timestamp');
+        timestamp.textContent = new Date(conversation.created_at).toLocaleTimeString();
+        div.appendChild(timestamp);
         chatWindow.appendChild(div);
       });
+      chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
     } catch (error) {
       console.error('Error loading chat:', error);
     }
@@ -87,6 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     console.log('Sending message:', message);
     try {
+      loadingIndicator.style.display = 'block'; // Show loading indicator
       const response = await fetch('/chat/conversations', {
         method: 'POST',
         headers: {
@@ -96,14 +106,32 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       const data = await response.json();
       userInput.value = '';
+
+      // User message
       const userMessage = document.createElement('div');
-      userMessage.textContent = `user: ${message}`;
+      userMessage.classList.add('message', 'user');
+      userMessage.textContent = `${message}`;
+      const userTimestamp = document.createElement('div');
+      userTimestamp.classList.add('timestamp');
+      userTimestamp.textContent = new Date().toLocaleTimeString();
+      userMessage.appendChild(userTimestamp);
       chatWindow.appendChild(userMessage);
+
+      // Assistant message
       const botMessage = document.createElement('div');
-      botMessage.textContent = `assistant: ${data.choices[0].message.content.trim()}`;
+      botMessage.classList.add('message', 'assistant');
+      botMessage.textContent = `${data.choices[0].message.content.trim()}`;
+      const botTimestamp = document.createElement('div');
+      botTimestamp.classList.add('timestamp');
+      botTimestamp.textContent = new Date().toLocaleTimeString();
+      botMessage.appendChild(botTimestamp);
       chatWindow.appendChild(botMessage);
+
+      chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
+      loadingIndicator.style.display = 'none'; // Hide loading indicator
     } catch (error) {
       console.error('Error sending message:', error);
+      loadingIndicator.style.display = 'none'; // Hide loading indicator
     }
   };
 
@@ -118,8 +146,10 @@ document.addEventListener('DOMContentLoaded', function() {
         body: JSON.stringify({ sessionName })
       });
       if (response.ok) {
+        const newSession = await response.json();
         modal.classList.add('hidden');
         window.location.reload(); // Refresh the page
+        return newSession; // Return the newly created session
       } else {
         console.error('Error creating chat session:', response.statusText);
       }
