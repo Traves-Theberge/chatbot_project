@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build:css": "npx tailwindcss -i ./public/tailwind.css -o ./public/build/styles.css",
+    "build": "npm run build:css && webpack --mode production",
+    "build:css": "npx tailwindcss -i ./public/tailwind.css -o ./public/build/styles.css --minify",
     "start": "node server/server.js"
   },
   "keywords": [],
