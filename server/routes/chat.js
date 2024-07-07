@@ -74,6 +74,37 @@ router.post('/sessions', authenticateUser, async (req, res) => {
   }
 });
 
+// Delete chat session
+router.delete('/sessions/:sessionId', authenticateUser, async (req, res) => {
+  const sessionId = req.params.sessionId;
+  const userId = req.user.id;
+  console.log('Deleting chat session for user:', userId, 'with session ID:', sessionId);
+
+  try {
+    const { data, error } = await supabaseClient
+      .from('chat_sessions')
+      .delete()
+      .eq('id', sessionId)
+      .eq('user_id', userId)
+      .single();
+
+    if (error) {
+      console.error('Error deleting chat session:', error);
+      return res.status(500).json({ error: error.message });
+    }
+
+    await supabaseClient
+      .from('conversations')
+      .delete()
+      .eq('session_id', sessionId);
+
+    res.status(204).end();
+  } catch (error) {
+    console.error('Internal server error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 // Handle new messages
 router.post('/conversations', authenticateUser, async (req, res) => {
   const userId = req.user.id;

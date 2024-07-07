@@ -19,23 +19,46 @@ document.addEventListener('DOMContentLoaded', function() {
       const sessions = await response.json();
       if (Array.isArray(sessions)) {
         chatSessionsList.innerHTML = '';
-        sessions.forEach(session => {
-          const li = document.createElement('li');
-          li.textContent = session.session_name;
-          li.dataset.sessionId = session.id;
-          li.classList.add('p-2', 'hover:bg-gray-700', 'cursor-pointer');
-          li.addEventListener('click', () => {
-            chatSessionsList.dataset.activeSessionId = session.id;
-            loadChat(session.id);
+        if (sessions.length > 0) {
+          sessions.forEach(session => {
+            addChatSessionToList(session);
           });
-          chatSessionsList.appendChild(li);
-        });
+          // Automatically select and load the most recent chat session
+          const mostRecentSession = sessions[sessions.length - 1];
+          chatSessionsList.dataset.activeSessionId = mostRecentSession.id;
+          loadChat(mostRecentSession.id);
+        } else {
+          // Automatically create a new session if no sessions are present
+          await createChatSession('New Chat');
+        }
       } else {
         console.error('Unexpected response format:', sessions);
       }
     } catch (error) {
       console.error('Error loading chat sessions:', error);
     }
+  };
+
+  const addChatSessionToList = (session) => {
+    const li = document.createElement('li');
+    li.textContent = session.session_name;
+    li.dataset.sessionId = session.id;
+    li.classList.add('p-2', 'hover:bg-gray-700', 'cursor-pointer', 'flex', 'justify-between');
+    li.addEventListener('click', () => {
+      chatSessionsList.dataset.activeSessionId = session.id;
+      loadChat(session.id);
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'x';
+    deleteButton.classList.add('ml-4', 'text-red-500');
+    deleteButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      deleteChatSession(session.id, li);
+    });
+
+    li.appendChild(deleteButton);
+    chatSessionsList.appendChild(li);
   };
 
   const loadChat = async (sessionId) => {
@@ -77,10 +100,51 @@ document.addEventListener('DOMContentLoaded', function() {
       userMessage.textContent = `user: ${message}`;
       chatWindow.appendChild(userMessage);
       const botMessage = document.createElement('div');
-      botMessage.textContent = `bot: ${data.choices[0].message.content.trim()}`;
+      botMessage.textContent = `assistant: ${data.choices[0].message.content.trim()}`;
       chatWindow.appendChild(botMessage);
     } catch (error) {
       console.error('Error sending message:', error);
+    }
+  };
+
+  const createChatSession = async (sessionName) => {
+    console.log('Creating new chat session with name:', sessionName);
+    try {
+      const response = await fetch('/chat/sessions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sessionName })
+      });
+      if (response.ok) {
+        modal.classList.add('hidden');
+        window.location.reload(); // Refresh the page
+      } else {
+        console.error('Error creating chat session:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Error creating chat session:', error);
+    }
+  };
+
+  const deleteChatSession = async (sessionId, listItem) => {
+    console.log('Deleting chat session with id:', sessionId);
+    try {
+      const response = await fetch(`/chat/sessions/${sessionId}`, {
+        method: 'DELETE'
+      });
+      if (response.ok) {
+        chatSessionsList.removeChild(listItem);
+        if (chatSessionsList.dataset.activeSessionId === sessionId) {
+          chatSessionsList.dataset.activeSessionId = null;
+          chatWindow.innerHTML = '';
+        }
+      } else {
+        console.error('Failed to delete chat session');
+      }
+    } catch (error) {
+      console.error('Error deleting chat session:', error);
     }
   };
 
@@ -99,36 +163,9 @@ document.addEventListener('DOMContentLoaded', function() {
     modal.classList.add('hidden');
   });
 
-  createButton.addEventListener('click', async () => {
+  createButton.addEventListener('click', () => {
     const sessionName = newChatNameInput.value;
-    console.log('Creating new chat session with name:', sessionName);
-    try {
-      const response = await fetch('/chat/sessions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ sessionName })
-      });
-      const session = await response.json();
-      chatSessionsList.dataset.activeSessionId = session.id;
-      const li = document.createElement('li');
-      li.textContent = session.session_name;
-      li.dataset.sessionId = session.id;
-      li.classList.add('p-2', 'hover:bg-gray-700', 'cursor-pointer');
-      li.addEventListener('click', () => {
-        chatSessionsList.dataset.activeSessionId = session.id;
-        loadChat(session.id);
-      });
-      chatSessionsList.appendChild(li);
-      modal.classList.add('hidden');
-      chatWindow.innerHTML = '';
-      const initialMessage = document.createElement('div');
-      initialMessage.textContent = 'bot: How can I help you today?';
-      chatWindow.appendChild(initialMessage);
-    } catch (error) {
-      console.error('Error creating chat session:', error);
-    }
+    createChatSession(sessionName);
   });
 
   logoutButton.addEventListener('click', async () => {
