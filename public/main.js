@@ -10,6 +10,25 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginButton = document.getElementById('login-button');
   const signupButton = document.getElementById('signup-button');
   const logoutButton = document.getElementById('logout-button');
+  const feedback = document.getElementById('feedback');
+  const loading = document.getElementById('loading');
+
+  const showFeedback = (message) => {
+    feedback.textContent = message;
+    feedback.classList.remove('hidden');
+  };
+
+  const hideFeedback = () => {
+    feedback.classList.add('hidden');
+  };
+
+  const showLoading = () => {
+    loading.classList.remove('hidden');
+  };
+
+  const hideLoading = () => {
+    loading.classList.add('hidden');
+  };
 
   if (showLogin) {
     console.log('Adding event listener to showLogin');
@@ -18,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Toggling login and signup forms');
         loginForm.classList.remove('hidden');
         signupForm.classList.add('hidden');
+        hideFeedback();
       }
     });
   }
@@ -29,6 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Toggling signup and login forms');
         signupForm.classList.remove('hidden');
         loginForm.classList.add('hidden');
+        hideFeedback();
       }
     });
   }
@@ -47,8 +68,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const handleAuthResponse = (response) => {
     console.log('Handling auth response', response);
+    hideLoading();
     if (response.error) {
-      alert(response.error);
+      showFeedback(response.error);
     } else {
       window.location.href = 'chat.html'; // Redirect to chat interface
     }
@@ -56,10 +78,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
   const handleSignupResponse = (response) => {
     console.log('Handling signup response', response);
+    hideLoading();
     if (response.error) {
-      alert(response.error);
+      showFeedback(response.error);
     } else {
-      alert(response.message);  // Show message using alert
+      showFeedback(response.message);
+      showLogin.click();
     }
   };
 
@@ -70,6 +94,11 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Login form submitted');
       const email = document.getElementById('login-email').value;
       const password = document.getElementById('login-password').value;
+      if (!email || !password) {
+        showFeedback('Please enter both email and password');
+        return;
+      }
+      showLoading();
       try {
         const response = await fetch('/auth/login', {
           method: 'POST',
@@ -82,6 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
         handleAuthResponse(response);
       } catch (error) {
         console.error('Login error:', error);
+        hideLoading();
+        showFeedback('Login failed. Please try again.');
       }
     });
   }
@@ -93,6 +124,11 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Signup form submitted');
       const email = document.getElementById('signup-email').value;
       const password = document.getElementById('signup-password').value;
+      if (!email || !password) {
+        showFeedback('Please enter both email and password');
+        return;
+      }
+      showLoading();
       try {
         const response = await fetch('/auth/signup', {
           method: 'POST',
@@ -105,6 +141,8 @@ document.addEventListener('DOMContentLoaded', function() {
         handleSignupResponse(response);
       } catch (error) {
         console.error('Signup error:', error);
+        hideLoading();
+        showFeedback('Signup failed. Please try again.');
       }
     });
   }
@@ -129,14 +167,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Adding event listener to logoutButton');
     logoutButton.addEventListener('click', async () => {
       console.log('Logout button clicked');
+      showLoading();
       try {
         await fetch('/auth/logout', { method: 'POST' });
         if (authForms && userInfo) {
           authForms.classList.remove('hidden');
           userInfo.classList.add('hidden');
         }
+        hideLoading();
       } catch (error) {
         console.error('Logout error:', error);
+        hideLoading();
+        showFeedback('Logout failed. Please try again.');
       }
     });
   }
