@@ -3,7 +3,7 @@ export const renderMessage = (message, sender) => {
   
     const chatWindow = document.getElementById('chat-window');
     const div = document.createElement('div');
-    
+  
     // Add classes correctly
     div.classList.add('message');
     if (sender === 'user') {
@@ -17,8 +17,7 @@ export const renderMessage = (message, sender) => {
       <div class="content">${message}</div>
       <div class="timestamp text-xs mt-2 text-gray-400">${new Date().toLocaleTimeString()}</div>
     `;
-    
+  
     chatWindow.appendChild(div);
-    chatWindow.scrollTop = chatWindow.scrollHeight; // Auto-scroll to the latest message
   };
   

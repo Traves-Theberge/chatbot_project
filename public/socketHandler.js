@@ -1,6 +1,6 @@
 import { renderMessage } from './messageHandler.js';
 
-const socket = io();
+export const socket = io();
 
 socket.on('connect', () => {
   console.log('Connected to WebSocket server');
@@ -8,6 +8,7 @@ socket.on('connect', () => {
 
 socket.on('chat message', ({ sessionId, userMessage, assistantMessage }) => {
   const chatSessionsList = document.getElementById('chat-sessions');
+  const chatWindow = document.getElementById('chat-window');
   if (chatSessionsList.dataset.activeSessionId === sessionId) {
     if (userMessage) {
       renderMessage(userMessage, 'user');

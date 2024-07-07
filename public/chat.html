@@ -5,23 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Chatbot</title>
   <link href="./build/styles.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body class="flex h-screen bg-gray-900 text-white">
   <div class="w-1/4 h-full bg-gray-800 flex flex-col">
     <div class="p-4 flex justify-between items-center border-b border-gray-700">
       <h2 class="text-xl font-semibold">Chats</h2>
       <div>
-        <button id="new-chat-button" class="bg-green-500 text-white p-2 rounded mr-2 hover:bg-green-600">New Chat</button>
-        <button id="logout-button" class="bg-red-500 text-white p-2 rounded hover:bg-red-600">Logout</button>
+        <button id="new-chat-button" class="bg-green-500 text-white p-2 rounded mr-2 hover:bg-green-600">
+          <i class="fas fa-plus"></i> New Chat
+        </button>
+        <button id="logout-button" class="bg-red-500 text-white p-2 rounded hover:bg-red-600">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
       </div>
     </div>
     <ul id="chat-sessions" class="flex-grow overflow-y-auto p-2 space-y-2" data-active-session-id="null"></ul>
-    <div id="modal" class="p-4 hidden">
-      <h2 class="text-xl mb-4">New Chat Session</h2>
-      <input type="text" id="new-chat-name" class="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white" placeholder="Enter chat session name">
-      <div class="flex justify-center">
-        <button id="cancel-button" class="bg-gray-600 text-white p-2 rounded mr-2 hover:bg-gray-700">Cancel</button>
-        <button id="create-button" class="bg-green-500 text-white p-2 rounded hover:bg-green-600">Create</button>
+    <!-- Modal -->
+    <div id="modal" class="p-4 hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-1/3">
+        <h2 id="modal-title" class="text-xl mb-4 text-center">New Chat Session</h2>
+        <input type="text" id="new-chat-name" class="w-full p-2 mb-4 border border-gray-600 rounded bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter chat session name">
+        <div class="flex justify-center">
+          <button id="cancel-button" class="bg-gray-600 text-white p-2 rounded mr-2 hover:bg-gray-700">Cancel</button>
+          <button id="create-button" class="bg-green-500 text-white p-2 rounded hover:bg-green-600">Create</button>
+        </div>
       </div>
     </div>
   </div>
@@ -31,7 +39,9 @@
     </div>
     <div class="w-full p-4 bg-gray-800 flex">
       <input type="text" id="user-input" class="flex-grow p-2 border border-gray-600 rounded-l-lg bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Type your message...">
-      <button id="send-button" class="p-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">Send</button>
+      <button id="send-button" class="p-2 bg-blue-500 text-white rounded-r-lg hover:bg-blue-600">
+        <i class="fas fa-paper-plane"></i>
+      </button>
     </div>
   </div>
   <!-- Include the Socket.IO client library -->

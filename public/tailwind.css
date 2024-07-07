@@ -2,17 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-.message {
-  animation: fadeIn 0.3s ease-in-out;
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 12px;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+::-webkit-scrollbar-track {
+  background: #2d2d2d;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 10px;
+  border: 2px solid #2d2d2d;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
