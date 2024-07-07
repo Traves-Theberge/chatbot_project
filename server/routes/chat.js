@@ -1,3 +1,4 @@
+// File: server/routes/chat.js
 const express = require('express');
 const router = express.Router();
 const { authenticateUser, supabaseClient } = require('../middleware/auth');
@@ -23,7 +24,6 @@ router.get('/sessions', authenticateUser, async (req, res) => {
 // Fetch conversation history
 router.get('/conversations/:sessionId', authenticateUser, async (req, res) => {
   const sessionId = req.params.sessionId;
-  const userId = req.user.id;
 
   if (!uuidValidate(sessionId)) {
     return res.status(400).json({ error: 'Invalid session ID' });
@@ -47,6 +47,10 @@ router.post('/sessions', authenticateUser, async (req, res) => {
   const userId = req.user.id;
   const { sessionName } = req.body;
 
+  if (!sessionName) {
+    return res.status(400).json({ error: 'Session name is required' });
+  }
+
   try {
     const { data, error } = await supabaseClient
       .from('chat_sessions')
@@ -67,6 +71,10 @@ router.post('/sessions', authenticateUser, async (req, res) => {
 router.delete('/sessions/:sessionId', authenticateUser, async (req, res) => {
   const sessionId = req.params.sessionId;
   const userId = req.user.id;
+
+  if (!uuidValidate(sessionId)) {
+    return res.status(400).json({ error: 'Invalid session ID' });
+  }
 
   try {
     const { data, error } = await supabaseClient
@@ -98,6 +106,10 @@ router.post('/conversations', authenticateUser, async (req, res) => {
 
   if (!uuidValidate(sessionId)) {
     return res.status(400).json({ error: 'Invalid session ID' });
+  }
+
+  if (!message) {
+    return res.status(400).json({ error: 'Message content is required' });
   }
 
   try {

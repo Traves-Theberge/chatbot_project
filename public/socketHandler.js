@@ -1,3 +1,4 @@
+// File: public/socketHandler.js
 import { renderMessage } from './messageHandler.js';
 
 export const socket = io();
@@ -26,7 +27,6 @@ export const sendMessage = () => {
   const message = userInput.value.trim();
   if (!activeSessionId || !message) return;
 
-  // Don't render the message immediately
   userInput.value = '';
 
   socket.emit('chat message', { sessionId: activeSessionId, message });

@@ -1,3 +1,4 @@
+// File: server/routes/auth.js
 const express = require('express');
 const router = express.Router();
 const { supabaseClient } = require('../middleware/auth');
@@ -18,6 +19,11 @@ const insertUser = async (user) => {
 // Signup route
 router.post('/signup', async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
   const { user, error } = await supabaseClient.auth.signUp({ email, password });
 
   if (error) {
@@ -35,6 +41,11 @@ router.post('/signup', async (req, res) => {
 // Login route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ error: 'Email and password are required' });
+  }
+
   const { data: session, error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
   if (error) {
@@ -53,8 +64,12 @@ router.post('/login', async (req, res) => {
 
 // Logout route
 router.post('/logout', (req, res) => {
-  req.session.destroy();
-  res.status(200).json({ message: 'Logged out' });
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Logout failed. Please try again.' });
+    }
+    res.status(200).json({ message: 'Logged out' });
+  });
 });
 
 module.exports = router;

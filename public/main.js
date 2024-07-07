@@ -1,3 +1,4 @@
+// File: public/main.js
 document.addEventListener('DOMContentLoaded', function() {
   console.log('DOM fully loaded and parsed');
 
@@ -105,7 +106,8 @@ document.addEventListener('DOMContentLoaded', function() {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password }),
+          credentials: 'same-origin' // Use credentials for secure cookies
         }).then(res => res.json());
 
         handleAuthResponse(response);
@@ -135,7 +137,8 @@ document.addEventListener('DOMContentLoaded', function() {
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ email, password })
+          body: JSON.stringify({ email, password }),
+          credentials: 'same-origin' // Use credentials for secure cookies
         }).then(res => res.json());
 
         handleSignupResponse(response);
@@ -169,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
       console.log('Logout button clicked');
       showLoading();
       try {
-        await fetch('/auth/logout', { method: 'POST' });
+        await fetch('/auth/logout', { method: 'POST', credentials: 'same-origin' });
         if (authForms && userInfo) {
           authForms.classList.remove('hidden');
           userInfo.classList.add('hidden');

@@ -1,6 +1,7 @@
+// File: server/server.js
 const express = require('express');
 const dotenv = require('dotenv');
-dotenv.config(); // Ensure this is called first
+dotenv.config();
 
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
@@ -9,6 +10,7 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
+const helmet = require('helmet'); // Add Helmet for security
 const { supabaseClient } = require('./middleware/auth');
 const OpenAI = require('openai');
 
@@ -22,6 +24,7 @@ const openai = new OpenAI({
 });
 
 app.use(cors());
+app.use(helmet()); // Use Helmet for setting various HTTP headers for security
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -29,7 +32,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: false }
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 app.use(express.static(path.join(__dirname, '../public')));
@@ -53,7 +56,6 @@ io.on('connection', (socket) => {
 
   socket.on('chat message', async ({ sessionId, message }) => {
     try {
-      // Insert user message into conversations
       const { data: userMessage, error: userMessageError } = await supabaseClient
         .from('conversations')
         .insert([{ session_id: sessionId, sender: 'user', content: message }])
@@ -63,10 +65,8 @@ io.on('connection', (socket) => {
         return socket.emit('error', { error: userMessageError.message });
       }
 
-      // Emit the user message to the client
       io.emit('chat message', { sessionId, userMessage: message });
 
-      // Fetch conversation history
       const { data: conversations, error: historyError } = await supabaseClient
         .from('conversations')
         .select('*')
@@ -83,7 +83,6 @@ io.on('connection', (socket) => {
       });
       messages.push({ role: 'user', content: message });
 
-      // Get response from OpenAI
       const completion = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages
@@ -91,13 +90,11 @@ io.on('connection', (socket) => {
 
       const assistantMessage = completion.choices[0].message.content.trim();
 
-      // Insert assistant message into conversations
       await supabaseClient
         .from('conversations')
         .insert([{ session_id: sessionId, sender: 'assistant', content: assistantMessage }])
         .single();
 
-      // Emit the assistant message to the client
       io.emit('chat message', { sessionId, assistantMessage });
     } catch (error) {
       console.error('Error handling chat message:', error);
@@ -106,8 +103,7 @@ io.on('connection', (socket) => {
   });
 
   socket.on('create chat session', async (sessionName) => {
-    // Logic to create a new chat session
-    const newSession = { id: 'new-session-id', session_name: sessionName };  // Simplified for this example
+    const newSession = { id: 'new-session-id', session_name: sessionName };
     socket.emit('chat session created', newSession);
   });
 });

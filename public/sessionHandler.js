@@ -1,3 +1,4 @@
+// File: public/sessionHandler.js
 import { renderMessage } from './messageHandler.js';
 
 export const addChatSessionToList = (session) => {
@@ -33,7 +34,6 @@ export const loadChat = async (sessionId) => {
     conversations.forEach(conversation => {
       renderMessage(conversation.content, conversation.sender);
     });
-    // Ensure the chat window scrolls to the bottom
     chatWindow.scrollTop = chatWindow.scrollHeight;
   } catch (error) {
     console.error('Error loading chat:', error);

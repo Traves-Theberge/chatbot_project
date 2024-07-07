@@ -1,10 +1,10 @@
+// File: public/messageHandler.js
 export const renderMessage = (message, sender) => {
-  if (!message) return; // Avoid rendering undefined messages
+  if (!message) return;
 
   const chatWindow = document.getElementById('chat-window');
   const div = document.createElement('div');
 
-  // Add classes correctly
   div.classList.add('message');
   if (sender === 'user') {
     div.classList.add('bg-blue-500', 'text-white', 'self-end');
@@ -19,7 +19,5 @@ export const renderMessage = (message, sender) => {
   `;
 
   chatWindow.appendChild(div);
-
-  // Ensure the latest message is scrolled into view
   div.scrollIntoView({ behavior: 'smooth' });
 };
