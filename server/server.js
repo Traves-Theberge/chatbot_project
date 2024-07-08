@@ -39,7 +39,7 @@ const openai = new OpenAI({
 
 // Middleware
 app.use(cors({
-  origin: isProduction ? 'https://chatbot-dcyu.onrender.com' : 'http://localhost:3000',
+  origin: isProduction ? 'https://your-allowed-origin.com' : 'http://localhost:3000',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
