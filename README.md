@@ -12,6 +12,16 @@ This project is a real-time chatbot application built with the following technol
 - **Real-time Communication**: Socket.IO
 - **AI**: OpenAI API for chatbot responses
 
+## Images
+- **login**:
+![login](https://github.com/Traves-Theberge/chatbot_project/assets/26759760/002f139d-018b-43cb-8e6a-b1781ffd6aa7)
+- **signup**:
+![signup](https://github.com/Traves-Theberge/chatbot_project/assets/26759760/dc372304-5921-4777-bc9e-23e5f0b67d74)
+- **chat**:
+![Chat-view](https://github.com/Traves-Theberge/chatbot_project/assets/26759760/c3911476-efff-41cb-a411-07a9ae8cac49)
+- **additional chat**:
+![modal-add](https://github.com/Traves-Theberge/chatbot_project/assets/26759760/849510ff-a1b5-4614-9a70-3bfd47b41be8)
+
 ## Project Structure
 ```
 chatbot-project/
