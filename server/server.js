@@ -1,3 +1,4 @@
+// File: server/server.js
 const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -7,43 +8,14 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
-const helmet = require('helmet');
 const { Server } = require('socket.io');
+const helmet = require('helmet');
 const { supabaseClient } = require('./middleware/auth');
 const OpenAI = require('openai');
 
 const app = express();
-const isProduction = process.env.NODE_ENV === 'production';
 
-// Use HTTPS in production
-if (isProduction) {
-  const fs = require('fs');
-  const https = require('https');
-  const privateKey = fs.readFileSync('/etc/letsencrypt/live/chatbot-dcyu.onrender.com/privkey.pem', 'utf8');
-  const certificate = fs.readFileSync('/etc/letsencrypt/live/chatbot-dcyu.onrender.com/fullchain.pem', 'utf8');
-  const ca = fs.readFileSync('/etc/letsencrypt/live/chatbot-dcyu.onrender.com/chain.pem', 'utf8');
-
-  const credentials = { key: privateKey, cert: certificate, ca: ca };
-  var server = https.createServer(credentials, app);
-} else {
-  var server = app.listen(process.env.PORT || 3000, () => {
-    console.log(`Server is running at http://localhost:${process.env.PORT || 3000}`);
-  });
-}
-
-const io = new Server(server);
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-// Middleware
-app.use(cors({
-  origin: isProduction ? 'https://your-allowed-origin.com' : 'http://localhost:3000',
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(cors());
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -52,7 +24,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: isProduction } // Use secure cookies in production
+  cookie: { secure: process.env.NODE_ENV === 'production' } // Secure cookies
 }));
 
 app.use(express.static(path.join(__dirname, '../public')));
@@ -66,6 +38,12 @@ app.use('/chat', chatRoutes);
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
+
+const server = app.listen(process.env.PORT || 3000, () => {
+  console.log(`Server is running at https://localhost:${process.env.PORT || 3000}`);
+});
+
+const io = new Server(server);
 
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -127,9 +105,3 @@ io.on('connection', (socket) => {
     socket.emit('chat session created', newSession);
   });
 });
-
-if (isProduction) {
-  server.listen(process.env.PORT || 3000, () => {
-    console.log(`Server is running at https://chatbot-dcyu.onrender.com`);
-  });
-}
