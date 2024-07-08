@@ -8,15 +8,23 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const path = require('path');
+const http = require('http');
 const { Server } = require('socket.io');
-const helmet = require('helmet');
+const helmet = require('helmet'); // Add Helmet for security
 const { supabaseClient } = require('./middleware/auth');
 const OpenAI = require('openai');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+const port = process.env.PORT || 3000;
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 app.use(cors());
-app.use(helmet());
+app.use(helmet()); // Use Helmet for setting various HTTP headers for security
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -24,7 +32,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' } // Secure cookies
+  cookie: { secure: process.env.NODE_ENV === 'production' }
 }));
 
 app.use(express.static(path.join(__dirname, '../public')));
@@ -38,12 +46,6 @@ app.use('/chat', chatRoutes);
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
-
-const server = app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running at https://localhost:${process.env.PORT || 3000}`);
-});
-
-const io = new Server(server);
 
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -104,4 +106,8 @@ io.on('connection', (socket) => {
     const newSession = { id: 'new-session-id', session_name: sessionName };
     socket.emit('chat session created', newSession);
   });
+});
+
+server.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });

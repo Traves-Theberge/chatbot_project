@@ -59,8 +59,6 @@ router.post('/login', async (req, res) => {
 
   await insertUser(user);
   req.session.user = { id: user.id, email: user.email, access_token: session.access_token };
-  
-  // Only send non-sensitive information back to the client
   res.status(200).json({ email: user.email });
 });
 
