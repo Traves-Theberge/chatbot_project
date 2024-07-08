@@ -15,6 +15,7 @@ chatbot-project/
 │
 ├── public/
 │ ├── build/
+│ │ ├── bundle.js
 │ │ └── styles.css # Compiled CSS styles from Tailwind
 │ ├── index.html # The homepage containing login and signup forms
 │ ├── chat.html # The chat interface page
