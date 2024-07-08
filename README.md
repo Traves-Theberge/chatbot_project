@@ -1,5 +1,8 @@
 # Chatbot Project
 
+## This project is a proof of concept.
+
+
 ## Overview
 
 This project is a real-time chatbot application built with the following technologies:
