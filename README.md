@@ -8,7 +8,7 @@
 This project is a real-time chatbot application built with the following technologies:
 - **Frontend**: HTML, CSS (Tailwind CSS), JavaScript (ES6+)
 - **Backend**: Node.js, Express.js
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Supabase
 - **Real-time Communication**: Socket.IO
 - **AI Integration**: OpenAI API and Mistral AI for generating chatbot responses
 
