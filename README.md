@@ -6,11 +6,11 @@
 ## Overview
 
 This project is a real-time chatbot application built with the following technologies:
-- **Frontend**: HTML, CSS (Tailwind CSS), JavaScript
-- **Backend**: Node.js, Express
-- **Database**: Supabase
+- **Frontend**: HTML, CSS (Tailwind CSS), JavaScript (ES6+)
+- **Backend**: Node.js, Express.js
+- **Database**: Supabase (PostgreSQL)
 - **Real-time Communication**: Socket.IO
-- **AI**: OpenAI API for chatbot responses
+- **AI Integration**: OpenAI API and Mistral AI for generating chatbot responses
 
 ## Images
 - **login**:
@@ -41,6 +41,8 @@ chatbot-project/
 │ └── modalHandler.js # JavaScript file for handling modal logic
 │
 ├── server/
+│ ├── config/
+│ │ └── models.mjs # Configuration file for initializing AI models
 │ ├── middleware/
 │ │ └── auth.js # Middleware for authenticating users using Supabase
 │ ├── routes/
@@ -71,8 +73,8 @@ Create a `.env` file in the root directory with the following content:
 SUPABASE_URL=your_supabase_url
 SUPABASE_KEY=your_supabase_key
 OPENAI_API_KEY=your_openai_api_key
+MISTRAL_API_KEY=your_mistral_api_key
 SESSION_SECRET=your_session_secret
-```
 
 ### Installation
 
@@ -103,8 +105,8 @@ SESSION_SECRET=your_session_secret
 
 - **User Authentication**: Sign up, login, and logout functionality using Supabase.
 - **Real-Time Chat**: Real-time messaging using Socket.IO.
-- **Chat Sessions**: Create and delete chat sessions.
-- **AI Responses**: Chatbot responses powered by the OpenAI API.
+- **Chat Sessions**: Create and manage chat sessions.
+- **AI Responses**: Chatbot responses powered by OpenAI and Mistral APIs.
 - **Responsive Design**: Modern and responsive UI designed with Tailwind CSS.
 
 ## File Descriptions
@@ -124,10 +126,11 @@ SESSION_SECRET=your_session_secret
 
 ### Backend
 
-- **`auth.js`**: Middleware for authenticating users using Supabase.
-- **`auth.js`**: Routes for handling signup, login, and logout.
-- **`chat.js`**: Routes for handling chat sessions and messages.
+- **`middleware/auth.js`**: Middleware for authenticating users using Supabase.
+- **`routes/auth.js`**: Routes for handling signup, login, and logout.
+- **`routes/chat.js`**: Routes for handling chat sessions and messages.
 - **`server.js`**: Main server file setting up the Express server.
+- **`config/models.mjs`**: Configuration file for initializing AI models.
 
 ## Contributing
 
