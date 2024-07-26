@@ -2,12 +2,16 @@
 const express = require('express');
 const router = express.Router();
 const { authenticateUser, supabaseClient } = require('../middleware/auth');
-const OpenAI = require('openai');
 const { v4: uuidv4, validate: uuidValidate } = require('uuid');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+let models;
+const loadModels = async () => {
+  if (!models) {
+    models = await import('../config/models.mjs');
+  }
+};
+
+loadModels().catch(err => console.error('Error loading models:', err));
 
 // Fetch chat sessions
 router.get('/sessions', authenticateUser, async (req, res) => {
@@ -101,8 +105,11 @@ router.delete('/sessions/:sessionId', authenticateUser, async (req, res) => {
 
 // Handle new messages
 router.post('/conversations', authenticateUser, async (req, res) => {
+  await loadModels(); // Ensure models are loaded
+
   const userId = req.user.id;
-  const { sessionId, message } = req.body;
+  const { sessionId, message, selectedModel } = req.body;
+  const model = models[selectedModel || 'openai'];
 
   if (!uuidValidate(sessionId)) {
     return res.status(400).json({ error: 'Invalid session ID' });
@@ -110,6 +117,10 @@ router.post('/conversations', authenticateUser, async (req, res) => {
 
   if (!message) {
     return res.status(400).json({ error: 'Message content is required' });
+  }
+
+  if (!model || !model.generateMessage) {
+    return res.status(500).json({ error: `Model ${selectedModel} not properly loaded` });
   }
 
   try {
@@ -134,20 +145,15 @@ router.post('/conversations', authenticateUser, async (req, res) => {
       return res.status(500).json({ error: historyError.message });
     }
 
-    // Prepare messages for OpenAI
+    // Prepare messages for the model
     const messages = [{ role: 'system', content: 'You are a helpful assistant.' }];
     conversations.forEach(conversation => {
       messages.push({ role: conversation.sender === 'user' ? 'user' : 'assistant', content: conversation.content });
     });
     messages.push({ role: 'user', content: message });
 
-    // Get assistant response from OpenAI
-    const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages
-    });
-
-    const assistantMessage = completion.choices[0].message.content.trim();
+    // Get assistant response from the selected model
+    const assistantMessage = await model.generateMessage(messages);
 
     // Insert assistant message into conversations
     const { data: assistantMessageData, error: assistantMessageError } = await supabaseClient

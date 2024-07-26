@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutButton = document.getElementById('logout-button');
   const sendButton = document.getElementById('send-button');
   const userInput = document.getElementById('user-input');
+  const modelSelect = document.getElementById('model-select');
 
   newChatButton.addEventListener('click', () => {
     showModal('New Chat Session', async (sessionName) => {
@@ -25,11 +26,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  sendButton.addEventListener('click', sendMessage);
+  sendButton.addEventListener('click', () => sendMessage(modelSelect.value));
 
   userInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
-      sendMessage();
+      sendMessage(modelSelect.value);
+    }
+  });
+
+  modelSelect.addEventListener('change', async () => {
+    const selectedModel = modelSelect.value;
+    try {
+      const response = await fetch('/set-model', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ model: selectedModel }),
+        credentials: 'same-origin'
+      });
+      if (!response.ok) {
+        throw new Error('Failed to set model');
+      }
+      console.log('Model set to:', selectedModel);
+    } catch (error) {
+      console.error('Error setting model:', error);
     }
   });
 

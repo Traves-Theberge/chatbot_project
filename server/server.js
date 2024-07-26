@@ -10,30 +10,47 @@ const cors = require('cors');
 const path = require('path');
 const http = require('http');
 const { Server } = require('socket.io');
-const helmet = require('helmet'); // Add Helmet for security
+const helmet = require('helmet');
 const { supabaseClient } = require('./middleware/auth');
-const OpenAI = require('openai');
+
+// Function to load models
+const loadModels = async () => {
+  try {
+    const initializeModels = await import('./config/models.mjs');
+    const models = await initializeModels.default();
+    console.log('Models loaded:', Object.keys(models));
+    return models;
+  } catch (err) {
+    console.error('Error loading models:', err);
+    throw err;
+  }
+};
+
+let models;
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 const port = process.env.PORT || 3000;
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// Use a more robust session store, like Redis or MongoDB
+// For this example, we'll use the memory store, but it's not recommended for production
+const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET,
+  resave: false,
+  saveUninitialized: false,
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
 });
 
 app.use(cors());
-app.use(helmet()); // Use Helmet for setting various HTTP headers for security
+app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' }
-}));
+app.use(sessionMiddleware);
 
 app.use(express.static(path.join(__dirname, '../public')));
 
@@ -43,9 +60,43 @@ const chatRoutes = require('./routes/chat');
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
 
+app.post('/set-model', async (req, res) => {
+  try {
+    if (!models) {
+      console.log('Models not loaded, loading now...');
+      models = await loadModels();
+    }
+    const { model } = req.body;
+    console.log('Setting model to:', model);
+    if (models[model]) {
+      req.session.selectedModel = model;
+      req.session.save((err) => {
+        if (err) {
+          console.error('Error saving session:', err);
+          return res.status(500).json({ success: false, message: 'Failed to save session' });
+        }
+        console.log('Model set in session:', req.session.selectedModel);
+        res.json({ success: true, model });
+      });
+    } else {
+      res.status(400).json({ success: false, message: 'Invalid model selected' });
+    }
+  } catch (error) {
+    console.error('Error in /set-model:', error);
+    res.status(500).json({ success: false, message: 'Failed to load models' });
+  }
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
+
+// Wrap the socket middleware to ensure it has access to the latest session data
+const wrappedSessionMiddleware = (socket, next) => {
+  sessionMiddleware(socket.request, {}, next);
+};
+
+io.use(wrappedSessionMiddleware);
 
 io.on('connection', (socket) => {
   console.log('A user connected');
@@ -56,6 +107,20 @@ io.on('connection', (socket) => {
 
   socket.on('chat message', async ({ sessionId, message }) => {
     try {
+      if (!models) {
+        console.log('Models not loaded, loading now...');
+        models = await loadModels();
+      }
+
+      // Retrieve the selected model from the session
+      const selectedModel = socket.request.session.selectedModel || 'openai';
+      console.log('Retrieved selected model from session:', selectedModel);
+      const model = models[selectedModel];
+
+      if (!model || !model.generateMessage) {
+        throw new Error(`Model ${selectedModel} not properly loaded`);
+      }
+
       const { data: userMessage, error: userMessageError } = await supabaseClient
         .from('conversations')
         .insert([{ session_id: sessionId, sender: 'user', content: message }])
@@ -83,12 +148,7 @@ io.on('connection', (socket) => {
       });
       messages.push({ role: 'user', content: message });
 
-      const completion = await openai.chat.completions.create({
-        model: 'gpt-3.5-turbo',
-        messages
-      });
-
-      const assistantMessage = completion.choices[0].message.content.trim();
+      const assistantMessage = await model.generateMessage(messages);
 
       await supabaseClient
         .from('conversations')
@@ -108,6 +168,16 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
+const startServer = async () => {
+  try {
+    models = await loadModels();
+    server.listen(port, () => {
+      console.log(`Server is running at http://localhost:${port}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();

@@ -1,3 +1,4 @@
+<!-- File: public/chat.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,6 +13,10 @@
     <div class="p-4 flex justify-between items-center border-b border-gray-700">
       <h2 class="text-xl font-semibold">Chats</h2>
       <div>
+        <select id="model-select" class="bg-gray-800 text-white p-2 rounded mr-2">
+          <option value="openai">OpenAI</option>
+          <option value="mistral">Mistral AI</option>
+        </select>
         <button id="new-chat-button" class="bg-green-500 text-white p-2 rounded mr-2 hover:bg-green-600">
           <i class="fas fa-plus"></i> New Chat
         </button>
@@ -21,7 +26,6 @@
       </div>
     </div>
     <ul id="chat-sessions" class="flex-grow overflow-y-auto p-2 space-y-2" data-active-session-id="null"></ul>
-    <!-- Modal -->
     <div id="modal" class="p-4 hidden fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50">
       <div class="bg-gray-800 p-6 rounded-lg shadow-lg w-1/3">
         <h2 id="modal-title" class="text-xl mb-4 text-center">New Chat Session</h2>
@@ -44,7 +48,6 @@
       </button>
     </div>
   </div>
-  <!-- Include the Socket.IO client library -->
   <script src="/socket.io/socket.io.js"></script>
   <script type="module" src="chat.js"></script>
 </body>
