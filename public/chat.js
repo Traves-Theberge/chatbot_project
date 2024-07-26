@@ -37,21 +37,23 @@ document.addEventListener('DOMContentLoaded', () => {
   modelSelect.addEventListener('change', async () => {
     const selectedModel = modelSelect.value;
     try {
-      const response = await fetch('/set-model', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ model: selectedModel }),
-        credentials: 'same-origin'
-      });
-      if (!response.ok) {
-        throw new Error('Failed to set model');
-      }
+      socket.emit('change model', { model: selectedModel });
       console.log('Model set to:', selectedModel);
     } catch (error) {
       console.error('Error setting model:', error);
     }
+  });
+
+  socket.on('model changed', ({ success, model }) => {
+    if (success) {
+      console.log('Model successfully changed to:', model);
+    } else {
+      console.error('Failed to change model');
+    }
+  });
+
+  socket.on('error', ({ error }) => {
+    console.error('Error:', error);
   });
 
   const loadChatSessions = async () => {

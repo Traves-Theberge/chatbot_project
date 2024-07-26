@@ -105,6 +105,32 @@ io.on('connection', (socket) => {
     console.log('User disconnected');
   });
 
+  socket.on('change model', async ({ model }) => {
+    try {
+      if (!models) {
+        console.log('Models not loaded, loading now...');
+        models = await loadModels();
+      }
+      if (models[model]) {
+        socket.request.session.selectedModel = model;
+        socket.request.session.save((err) => {
+          if (err) {
+            console.error('Error saving session:', err);
+            socket.emit('error', { error: 'Failed to save session' });
+          } else {
+            console.log('Model set in session:', model);
+            socket.emit('model changed', { success: true, model });
+          }
+        });
+      } else {
+        socket.emit('error', { error: 'Invalid model selected' });
+      }
+    } catch (error) {
+      console.error('Error in change model:', error);
+      socket.emit('error', { error: 'Failed to change model' });
+    }
+  });
+
   socket.on('chat message', async ({ sessionId, message }) => {
     try {
       if (!models) {
