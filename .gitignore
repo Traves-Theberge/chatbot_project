@@ -1,2 +1,6 @@
 node_modules
 .env
+public/build/bundle.js
+public/build/bundle.js.LICENSE.txt
+public/build/bundle.js
+public/build/bundle.js
