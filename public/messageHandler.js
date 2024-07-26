@@ -1,5 +1,5 @@
 // File: public/messageHandler.js
-export const renderMessage = (message, sender) => {
+export const renderMessage = (message, sender, model = '') => {
   if (!message) return;
 
   const chatWindow = document.getElementById('chat-window');
@@ -13,9 +13,12 @@ export const renderMessage = (message, sender) => {
   }
   div.classList.add('rounded-lg', 'p-4', 'my-2', 'max-w-lg');
 
+  const modelInfo = model ? ` - ${model}` : '';
   div.innerHTML = `
     <div class="content">${message}</div>
-    <div class="timestamp text-xs mt-2 text-gray-400">${new Date().toLocaleTimeString()}</div>
+    <div class="timestamp text-xs mt-2 text-white-400">
+      ${new Date().toLocaleTimeString()}${modelInfo}
+    </div>
   `;
 
   chatWindow.appendChild(div);

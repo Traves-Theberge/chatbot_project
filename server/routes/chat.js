@@ -124,50 +124,11 @@ router.post('/conversations', authenticateUser, async (req, res) => {
   }
 
   try {
-    // Insert user message into conversations
-    const { data: userMessage, error: userMessageError } = await supabaseClient
-      .from('conversations')
-      .insert([{ session_id: sessionId, sender: 'user', content: message }])
-      .single();
-
-    if (userMessageError) {
-      return res.status(500).json({ error: userMessageError.message });
-    }
-
-    // Fetch conversation history
-    const { data: conversations, error: historyError } = await supabaseClient
-      .from('conversations')
-      .select('*')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
-
-    if (historyError) {
-      return res.status(500).json({ error: historyError.message });
-    }
-
-    // Prepare messages for the model
-    const messages = [{ role: 'system', content: 'You are a helpful assistant.' }];
-    conversations.forEach(conversation => {
-      messages.push({ role: conversation.sender === 'user' ? 'user' : 'assistant', content: conversation.content });
-    });
-    messages.push({ role: 'user', content: message });
-
-    // Get assistant response from the selected model
-    const assistantMessage = await model.generateMessage(messages);
-
-    // Insert assistant message into conversations
-    const { data: assistantMessageData, error: assistantMessageError } = await supabaseClient
-      .from('conversations')
-      .insert([{ session_id: sessionId, sender: 'assistant', content: assistantMessage }])
-      .single();
-
-    if (assistantMessageError) {
-      return res.status(500).json({ error: assistantMessageError.message });
-    }
-
-    res.json({ userMessage: userMessage.content, assistantMessage });
+    const { handleChatMessage } = require('../../shared/messageHandler');
+    const result = await handleChatMessage(sessionId, message, model, supabaseClient);
+    res.json(result);
   } catch (error) {
-    res.status(500).json({ error: 'Internal Server Error' });
+    res.status(500).json({ error: error.message });
   }
 });
 

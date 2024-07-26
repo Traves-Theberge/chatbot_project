@@ -147,41 +147,10 @@ io.on('connection', (socket) => {
         throw new Error(`Model ${selectedModel} not properly loaded`);
       }
 
-      const { data: userMessage, error: userMessageError } = await supabaseClient
-        .from('conversations')
-        .insert([{ session_id: sessionId, sender: 'user', content: message }])
-        .single();
+      const { handleChatMessage } = require('./shared/messageHandler');
+      const result = await handleChatMessage(sessionId, message, model, supabaseClient);
 
-      if (userMessageError) {
-        return socket.emit('error', { error: userMessageError.message });
-      }
-
-      io.emit('chat message', { sessionId, userMessage: message });
-
-      const { data: conversations, error: historyError } = await supabaseClient
-        .from('conversations')
-        .select('*')
-        .eq('session_id', sessionId)
-        .order('created_at', { ascending: true });
-
-      if (historyError) {
-        return socket.emit('error', { error: historyError.message });
-      }
-
-      const messages = [{ role: 'system', content: 'You are a helpful assistant.' }];
-      conversations.forEach(conversation => {
-        messages.push({ role: conversation.sender === 'user' ? 'user' : 'assistant', content: conversation.content });
-      });
-      messages.push({ role: 'user', content: message });
-
-      const assistantMessage = await model.generateMessage(messages);
-
-      await supabaseClient
-        .from('conversations')
-        .insert([{ session_id: sessionId, sender: 'assistant', content: assistantMessage }])
-        .single();
-
-      io.emit('chat message', { sessionId, assistantMessage });
+      io.emit('chat message', { sessionId, ...result, model: selectedModel });
     } catch (error) {
       console.error('Error handling chat message:', error);
       socket.emit('error', { error: 'Internal server error' });

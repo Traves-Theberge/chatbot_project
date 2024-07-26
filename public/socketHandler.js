@@ -7,16 +7,12 @@ socket.on('connect', () => {
   console.log('Connected to WebSocket server');
 });
 
-socket.on('chat message', ({ sessionId, userMessage, assistantMessage }) => {
+socket.on('chat message', ({ sessionId, userMessage, assistantMessage, model }) => {
   const chatSessionsList = document.getElementById('chat-sessions');
   const chatWindow = document.getElementById('chat-window');
   if (chatSessionsList.dataset.activeSessionId === sessionId) {
-    if (userMessage) {
-      renderMessage(userMessage, 'user');
-    }
-    if (assistantMessage) {
-      renderMessage(assistantMessage, 'assistant');
-    }
+    renderMessage(userMessage, 'user');
+    renderMessage(assistantMessage, 'assistant', model);
   }
 });
 
